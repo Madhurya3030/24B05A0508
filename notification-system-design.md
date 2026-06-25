@@ -235,3 +235,109 @@ User receives notification instantly
 - Reduced server load
 - Faster user experience
 - Supports multiple concurrent users
+
+
+
+# Stage 2
+
+## Suggested Database
+
+I recommend **MongoDB (NoSQL)** because it provides:
+- Flexible schema
+- Easy JSON document storage
+- High scalability
+- Fast read/write performance
+- Suitable for notification systems
+
+---
+
+## Database Schema
+
+```javascript
+{
+  _id: ObjectId,
+  studentId: ObjectId,
+  title: String,
+  message: String,
+  notificationType: String,
+  targetAudience: String,
+  isRead: Boolean,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+---
+
+## Problems as Data Volume Increases
+
+- Slow query performance
+- Increased storage usage
+- Higher database load
+- Longer response time
+
+---
+
+## Solutions
+
+- Create indexes
+- Use pagination
+- Archive old notifications
+- Redis caching
+- Database sharding
+
+---
+
+## MongoDB Queries
+
+### Create Notification
+
+```javascript
+db.notifications.insertOne({
+  studentId,
+  title,
+  message,
+  notificationType,
+  targetAudience,
+  isRead: false,
+  createdAt: new Date()
+});
+```
+
+### Get All Notifications
+
+```javascript
+db.notifications.find({ studentId });
+```
+
+### Get Notification by ID
+
+```javascript
+db.notifications.findOne({ _id: ObjectId(id) });
+```
+
+### Get Unread Notifications
+
+```javascript
+db.notifications.find({
+  studentId,
+  isRead: false
+});
+```
+
+### Mark Notification as Read
+
+```javascript
+db.notifications.updateOne(
+  { _id: ObjectId(id) },
+  { $set: { isRead: true } }
+);
+```
+
+### Delete Notification
+
+```javascript
+db.notifications.deleteOne({
+  _id: ObjectId(id)
+});
+```
