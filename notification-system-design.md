@@ -458,3 +458,73 @@ Use:
 - Database Indexing
 
 This combination reduces database load, improves response time, and provides real-time notification delivery.
+
+
+
+
+# Stage 5
+
+## Shortcomings
+
+- Notifications are processed one by one, making the process slow.
+- If email sending fails, the remaining students will not receive notifications.
+- Database save and email sending are tightly coupled.
+- Poor scalability for 50,000 students.
+
+---
+
+## What if 200 Emails Fail?
+
+- Retry sending emails for failed students.
+- Store failed requests in a retry queue.
+- Continue processing remaining students.
+
+---
+
+## Improved Design
+
+- Save notification to the database first.
+- Add email and push notification jobs to a message queue.
+- Worker services process the queue asynchronously.
+- Retry failed jobs automatically.
+
+---
+
+## Should DB Save and Email Sending Happen Together?
+
+**No.**
+
+- Save to the database first to ensure data is not lost.
+- Email and push notifications should run asynchronously.
+- This improves reliability and performance.
+
+---
+
+## Revised Pseudocode
+
+```text
+function notify_all(student_ids, message):
+
+    for student_id in student_ids:
+
+        save_to_db(student_id, message)
+
+        enqueue_email(student_id, message)
+
+        enqueue_push(student_id, message)
+```
+
+### Worker
+
+```text
+while(queue not empty):
+
+    job = dequeue()
+
+    send_email(job)
+
+    push_to_app(job)
+
+    if failed:
+        retry(job)
+```
