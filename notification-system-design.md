@@ -341,3 +341,62 @@ db.notifications.deleteOne({
   _id: ObjectId(id)
 });
 ```
+
+
+
+
+# Stage 3
+
+## Is the Query Accurate?
+
+Yes, the query is correct because it fetches unread notifications for a specific student.
+
+
+
+---
+
+## Why is it Slow?
+
+- Large table (5,000,000 notifications)
+- Full table scan without proper indexing
+- Sorting a large number of records
+
+---
+
+## Improvements
+
+Create a composite index:
+
+```sql
+CREATE INDEX idx_student_read_created
+ON notifications(studentID, isRead, createdAt);
+```
+
+### Likely Computational Cost
+
+- **Without Index:** O(n)
+- **With Index:** O(log n)
+
+---
+
+## Should We Add Indexes on Every Column?
+
+**No.**
+
+Adding indexes on every column:
+- Increases storage usage
+- Slows INSERT, UPDATE, and DELETE operations
+- Is unnecessary for columns that are rarely searched
+
+Indexes should only be created on frequently queried columns.
+
+---
+
+## Query to Find Students Who Got Placement Notifications in the Last 7 Days
+
+```sql
+SELECT DISTINCT studentID
+FROM notifications
+WHERE notificationType = 'Placement'
+AND createdAt >= NOW() - INTERVAL 7 DAY;
+```
