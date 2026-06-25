@@ -400,3 +400,61 @@ FROM notifications
 WHERE notificationType = 'Placement'
 AND createdAt >= NOW() - INTERVAL 7 DAY;
 ```
+
+
+
+# Stage 4
+
+## Problem
+
+Fetching notifications from the database on every page load increases database load and slows down the application.
+
+---
+
+## Solutions
+
+### Redis Cache
+Store frequently accessed notifications in Redis.
+
+**Tradeoff**
+- Faster response
+- Extra memory required
+
+---
+
+### Pagination
+Fetch notifications in small batches instead of all at once.
+
+**Tradeoff**
+- Reduces database load
+- Multiple requests for older notifications
+
+---
+
+### WebSockets
+Push new notifications in real time instead of fetching repeatedly.
+
+**Tradeoff**
+- Instant updates
+- More complex implementation
+
+---
+
+### Database Indexing
+Create indexes on `studentId`, `isRead`, and `createdAt`.
+
+**Tradeoff**
+- Faster queries
+- Slightly slower INSERT and UPDATE operations
+
+---
+
+## Recommended Solution
+
+Use:
+- Redis Cache
+- Pagination
+- WebSockets
+- Database Indexing
+
+This combination reduces database load, improves response time, and provides real-time notification delivery.
