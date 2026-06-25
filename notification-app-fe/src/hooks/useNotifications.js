@@ -1,20 +1,56 @@
-import { useState, useEffect } from "react";
-import { fetchNotifications } from "../apis/notifications";
+import { useEffect, useState } from "react";
+import { getNotifications } from "../api/notifications";
 
-export function useNotifications() {
+export function useNotifications(page = 1, filter = "All") {
   const [notifications, setNotifications] = useState([]);
-  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const response = await getNotifications(
+        page,
+        10,
+        filter
+      );
+
+      // If API returns an object
+      if (response.notifications) {
+        setNotifications(response.notifications);
+        setTotalPages(response.totalPages || 1);
+      }
+      // If API returns an array
+      else if (Array.isArray(response)) {
+        setNotifications(response);
+        setTotalPages(1);
+      }
+      // Fallback
+      else {
+        setNotifications([]);
+        setTotalPages(1);
+      }
+    } catch (err) {
+      setError(err.message || "Something went wrong");
+      setNotifications([]);
+      setTotalPages(1);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const load = async () => {
-      const data = await fetchNotifications();
-      setNotifications(data.notifications ?? []);
-    };
+    fetchNotifications();
+  }, [page, filter]);
 
-    load();
-  }, [notifications]);
-
-  const totalPages = 0;
-
-  return { notifications, total, totalPages, loading: false, error: true };
+  return {
+    notifications,
+    totalPages,
+    loading,
+    error,
+    refresh: fetchNotifications,
+  };
 }
